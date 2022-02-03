@@ -33,7 +33,6 @@ struct Instruction program[100] = {
     PLUSI,
     PUSHI(35),
     MINUS,
-    PUSHI(34),
     {.type = EQ, .op = 0},
 };
 
@@ -76,7 +75,7 @@ int main(void){
             int op2 = svm.stack[svm.ip-1];
 
             svm.ip -= 2;
-            
+
             svm.stack[svm.ip++] = op1 - op2;
             DumpSVM(&svm);
         } else if(program[i].type == EQ){
@@ -89,10 +88,10 @@ int main(void){
             int op2 = svm.stack[svm.ip-1];
 
             svm.ip -= 2;
-            
+
             svm.stack[svm.ip++] = op1 == op2 ? 1 : 0;
             DumpSVM(&svm);
-            
+
         }
 
     }
