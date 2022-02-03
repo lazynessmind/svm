@@ -22,7 +22,7 @@ struct SVM {
     int ip;
 };
 
-//#define EQUAL {.type = EQ, .op = 0}
+#define EQUAL {.type = EQ, .op = 0}
 #define PLUSI {.type = PLUS, .op = 0}
 #define MINUSI {.type = MINUS, .op = 0}
 #define PUSHI(operand) {.type = PUSH, .op = operand}
@@ -32,8 +32,9 @@ struct Instruction program[100] = {
     PUSHI(34),
     PLUSI,
     PUSHI(35),
-    MINUS,
-    {.type = EQ, .op = 0},
+    MINUSI,
+    PUSHI(34),
+    EQUAL
 };
 
 void DumpSVM(struct SVM* svm) {
