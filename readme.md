@@ -5,6 +5,8 @@ The way I found to help Serenity. I'm implementing a simple VM with the tools th
 ## 1:
 
 Fells like the compiler is giving me weird errors that my simple brain can't understand because I'm to tired.
+^ <br>
+This was my fault do to lake of sleep lol.
 
 ### In need:
 
