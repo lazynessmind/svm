@@ -10,7 +10,9 @@ enum InstType {
     INST_PLUS,
     INST_MINUS,
     INST_EQ,
-    INST_JMP, //Maybe next time?
+    INST_LT,
+    INST_JMP,
+    INST_JNEQ,
 };
 
 struct Instruction {
@@ -24,21 +26,27 @@ struct SVM {
 };
 
 #define EQUAL {.type = INST_EQ, .op = 0}
-#define PLUSI {.type = INST_PLUS, .op = 0}
-#define MINUSI {.type = INST_MINUS, .op = 0}
-#define PUSHI(operand) {.type = INST_PUSH, .op = operand}
+#define LT { .type = INST_LT, .op = 0 }
+#define PLUS {.type = INST_PLUS, .op = 0}
+#define MINUS {.type = INST_MINUS, .op = 0}
+#define PUSH(operand) {.type = INST_PUSH, .op = operand}
 #define HALT {.type = INST_HALT, .op = 0}
 #define JMP(addr) {.type = INST_JMP, .op = addr}
+#define JNEQ(addr) {.type = INST_JNEQ, .op = addr }
+#define DUP {.type = INST_DUP, .op = 0}
 
 struct Instruction program[100] = {
-    PUSHI(35),
-    PUSHI(34),
-    PLUSI, //69
-    PUSHI(35), //35
-    MINUSI, //34
-    PUSHI(34), //34
-    EQUAL, // 1
-    JMP(1)
+    PUSH(0), //0
+    PUSH(1), //0, 1
+    DUP, // 0, 1, 1
+    PUSH(10), //0, 1, 1, 10
+    LT, // 0, 1, [1] == true
+    JNEQ(9), //0, 1
+    DUP,
+    PUSH(1), //0, 1, 1, 1
+    PLUS, // 0, 1, 2
+    JMP(2),
+    HALT
 };
 
 const char* InstToStr(int inst){
@@ -51,6 +59,8 @@ const char* InstToStr(int inst){
         case INST_MINUS: return "MINUS";
         case INST_EQ: return "EQUAL";
         case INST_JMP: return "JUMP";
+        case INST_JNEQ: return "JNEQ";
+        case INST_LT: return "LT";
         default:
             return "Unreachable";
     }
@@ -67,8 +77,9 @@ int main(void){
 
     struct SVM svm = {0};
 
-
+    int cnt = 0;
     for(int i = 0; i < 100; i++){
+        cnt++;
         if(program[i].type == INST_PUSH){
             svm.stack[svm.ip++] = program[i].op;
             DumpSVM(&svm, INST_PUSH);
@@ -112,10 +123,33 @@ int main(void){
             svm.stack[svm.ip++] = op1 == op2 ? 1 : 0;
             DumpSVM(&svm, INST_EQ);
 
+        } else if(program[i].type == INST_LT){
+            if(svm.ip < 2) {
+                printf("STACK_UNDERFLOW\n");
+                return 1;
+            }
+
+            int op1 = svm.stack[svm.ip-2];
+            int op2 = svm.stack[svm.ip-1];
+
+            svm.ip -= 2;
+
+            svm.stack[svm.ip++] = op1 < op2 ? 1 : 0;
+            DumpSVM(&svm, INST_LT);
+
         } else if(program[i].type == INST_JMP){
             i = program[i].op - 1;
             DumpSVM(&svm, INST_JMP);
 
+        } else if(program[i].type == INST_JNEQ){
+            int top = svm.stack[svm.ip - 1];
+            svm.ip--;
+            if(top != 1)
+                i = program[i].op;
+            DumpSVM(&svm, INST_JNEQ);
+        } else if(program[i].type == INST_HALT) {
+            DumpSVM(&svm, INST_HALT);
+            break;
         }
 
     }
