@@ -27,6 +27,9 @@ struct SVM {
 #define PLUSI {.type = INST_PLUS, .op = 0}
 #define MINUSI {.type = INST_MINUS, .op = 0}
 #define PUSHI(operand) {.type = INST_PUSH, .op = operand}
+#define HALT {.type = INST_HALT, .op = 0}
+#define JMP(addr) {.type = INST_JMP, .op = addr}
+
 struct Instruction program[100] = {
     PUSHI(35),
     PUSHI(34),
@@ -34,7 +37,8 @@ struct Instruction program[100] = {
     PUSHI(35), //35
     MINUSI, //34
     PUSHI(34), //34
-    EQUAL // 1
+    EQUAL, // 1
+    JMP(1)
 };
 
 const char* InstToStr(int inst){
@@ -107,6 +111,10 @@ int main(void){
 
             svm.stack[svm.ip++] = op1 == op2 ? 1 : 0;
             DumpSVM(&svm, INST_EQ);
+
+        } else if(program[i].type == INST_JMP){
+            i = program[i].op - 1;
+            DumpSVM(&svm, INST_JMP);
 
         }
 
